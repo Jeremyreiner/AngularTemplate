@@ -1,0 +1,22 @@
+.card {
+  width: 80%;
+  margin: 22px auto auto;
+  padding: 27px;
+  min-width: 257px;
+}
+
+.profile-pic {
+  width: 50px;
+  border-radius: 50px;
+  position: absolute;
+  right: 22px;
+}
+
+.container {
+  width: 100%;
+  position: absolute;
+}
+
+.example-spacer {
+  flex: 1 1 auto;
+}

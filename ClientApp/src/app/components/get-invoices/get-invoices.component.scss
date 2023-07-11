@@ -1,0 +1,33 @@
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.row {
+  height: 36px;
+}
+
+.row:hover {
+  background-color: #f5f5f5;
+}
+
+
+.delete-button {
+  color: #b2b2b2;
+  border: none;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  color: #626262;
+}
+
+tr {
+  text-align: left;
+}
+
+.refresh {
+  position: absolute;
+  right: 27px;
+  cursor: pointer;
+}

@@ -1,0 +1,24 @@
+<mat-toolbar color="primary">
+  <mat-toolbar-row>
+    <span>Invoice Crud Demo</span>
+    <span class="example-spacer"></span>
+    <app-theme-switch></app-theme-switch>
+  </mat-toolbar-row>
+</mat-toolbar>
+
+<div class="container" [style.background]="Constants.darkMode()? 'rgb(0 16 32)':'#f4f4f4'">
+
+  <mat-card class="card">
+    <app-header></app-header>
+  </mat-card>
+
+  <mat-card class="card">
+    <app-post-invoice></app-post-invoice>
+  </mat-card>
+
+  <mat-card class="card">
+    <app-get-invoices (refresh)="ngOnInit()" [invoices]="api.invoices"></app-get-invoices>
+  </mat-card>
+
+  <div style="height: 100px"></div>
+</div>

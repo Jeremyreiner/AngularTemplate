@@ -1,0 +1,91 @@
+<script src="get-invoices.component.ts"></script>
+<mat-card-header>
+  <mat-card-title [style.color]="Constants.color(true)">
+    View Invoices
+  </mat-card-title>
+  <mat-card-subtitle>
+    To Edit or Delete an invoice, click the three dots on the right side of the invoice.
+  </mat-card-subtitle>
+  <mat-icon class="refresh" (click)="refreshInvoices()">refresh</mat-icon>
+</mat-card-header>
+<div>
+  <mat-table *ngIf="invoices !== null" [dataSource]="dataSource">
+    <!-- Invoice Number Column -->
+    <ng-container matColumnDef="invoiceNumber">
+      <mat-header-cell *matHeaderCellDef> Invoice Number </mat-header-cell>
+      <mat-cell *matCellDef="let invoice"> {{ invoice.invoiceNumber }} </mat-cell>
+    </ng-container>
+
+    <!-- Invoice ID Column -->
+    <ng-container matColumnDef="id">
+      <mat-header-cell *matHeaderCellDef> Invoice ID </mat-header-cell>
+      <mat-cell *matCellDef="let invoice"> {{ invoice.id }} </mat-cell>
+    </ng-container>
+
+    <!-- Status Column -->
+    <ng-container matColumnDef="status">
+      <mat-header-cell *matHeaderCellDef> Status </mat-header-cell>
+      <mat-cell *matCellDef="let invoice" [style.color]="invoice.status | InvoiceStatusColor">
+        {{ invoice.status | InvoiceStatus }}
+      </mat-cell>
+    </ng-container>
+
+    <!-- Date Column -->
+    <ng-container matColumnDef="date">
+      <mat-header-cell *matHeaderCellDef> Date </mat-header-cell>
+      <mat-cell *matCellDef="let invoice"> {{ invoice.date | date: 'mediumDate' }} </mat-cell>
+    </ng-container>
+
+    <!-- VAT Column -->
+    <ng-container matColumnDef="vat">
+      <mat-header-cell *matHeaderCellDef> VAT </mat-header-cell>
+      <mat-cell *matCellDef="let invoice"> {{ invoice.vat | currency: 'USD' }} </mat-cell>
+    </ng-container>
+
+    <!-- Total Column -->
+    <ng-container matColumnDef="totalAmount">
+      <mat-header-cell *matHeaderCellDef> Total </mat-header-cell>
+      <mat-cell *matCellDef="let invoice"> {{ invoice.totalAmount | currency: 'USD' }} </mat-cell>
+    </ng-container>
+
+    <!-- More Actions Column -->
+    <ng-container matColumnDef="actions">
+      <mat-header-cell *matHeaderCellDef> </mat-header-cell>
+      <mat-cell *matCellDef="let invoice">
+        <button [matMenuTriggerFor]="menu" [matMenuTriggerData]="{ invoice: invoice }" mat-icon-button>
+          <mat-icon>
+            more_horiz
+          </mat-icon>
+        </button>
+      </mat-cell>
+    </ng-container>
+
+    <!-- Table Header -->
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+
+    <!-- Table Data Rows -->
+    <mat-row *matRowDef="let invoice; columns: displayedColumns"></mat-row>
+
+
+  </mat-table>
+
+  <mat-spinner style="margin: auto" *ngIf="invoices === null"></mat-spinner>
+
+
+
+  <!-- Pagination control -->
+  <mat-paginator
+    showFirstLastButtons
+    [pageSize]="10"
+    [pageSizeOptions]="[5, 10, 25, 50]"
+  ></mat-paginator>
+
+
+
+</div>
+<mat-menu #menu="matMenu">
+  <ng-template matMenuContent let-invoice="invoice">
+    <button mat-menu-item (click)="editInvoice(invoice)"><mat-icon>edit</mat-icon>  Edit Invoice</button>
+    <button mat-menu-item (click)="delete(invoice)"><mat-icon>delete</mat-icon><span>Delete Invoice </span> </button>
+  </ng-template>
+</mat-menu>

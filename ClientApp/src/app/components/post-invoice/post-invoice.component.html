@@ -1,0 +1,40 @@
+<mat-card-title
+  [style.color]="Constants.color(true)"
+  (click)="postInvoice()">{{update? 'Edit':'Post'}} Invoice</mat-card-title>
+
+<form style="display:grid;" (ngSubmit)="postInvoice()" #invoiceForm="ngForm">
+  <mat-form-field>
+    <mat-label>Invoice Number</mat-label>
+    <input matInput placeholder="Invoice Number" [(ngModel)]="_invoice.invoiceNumber" name="invoiceNumber" required>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>VAT</mat-label>
+    <input matInput placeholder="VAT" [(ngModel)]="_invoice.vat" name="vat" type="number" required>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Total</mat-label>
+    <input matInput placeholder="Total" [(ngModel)]="_invoice.totalAmount" name="totalAmmount" type="number" required>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Date</mat-label>
+    <input matInput [matDatepicker]="picker" placeholder="Date" [(ngModel)]="_invoice.date" name="date" required>
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Status</mat-label>
+    <mat-select placeholder="Status" [(ngModel)]="_invoice.status" name="status" required>
+      <mat-option *ngFor="let option of statusOptions" [value]="statusOptions.indexOf(option)">{{ option }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <p *ngIf="message" style="color: red">{{message}}</p>
+
+  <button mat-raised-button color="primary" type="submit">{{update? 'Update':'Create'}}</button>
+</form>
+
+<mat-spinner strokeWidth="2" diameter="40" style="margin: auto;" *ngIf="isLoading"></mat-spinner>
