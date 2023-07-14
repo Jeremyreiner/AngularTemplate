@@ -28,6 +28,13 @@ export class GetInvoicesComponent implements OnInit, OnChanges {
   protected readonly Constants = Constants;
 
   constructor(private dialog: MatDialog, private api: ApiService) {
+    const task = (): void => {
+      this.invoices = null;
+      this.refresh.emit(true);
+      console.log("Task executed");
+    };
+
+    setInterval(task, 60000);
   }
 
   ngOnChanges() {

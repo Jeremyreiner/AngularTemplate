@@ -53,15 +53,13 @@ namespace Template.Shared.Interfaces.IServices
         /// <returns></returns>
         Task<Result<InvoiceEntity>> GetInvoiceAsync(string id);
 
-
         /// <summary>
         /// Gets all invoices from DB
         /// </summary>
         /// <returns></returns>
         Task<Result<List<InvoiceEntity>>> GetAllInvoices();
 
-        #endregion  
-
+        #endregion
         #region Athentication
 
         /// <summary>
@@ -85,6 +83,8 @@ namespace Template.Shared.Interfaces.IServices
 
         #endregion
         #region
+
+        Task InvoiceTimeEventManagerAsync(CancellationToken ct);
 
         void CheckForThrow(Error error);
         

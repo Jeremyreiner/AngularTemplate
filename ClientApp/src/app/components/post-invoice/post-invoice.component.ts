@@ -34,6 +34,16 @@ export class PostInvoiceComponent {
 
   @Output() submit = new EventEmitter<boolean>();
 
+  async postAutoInvoice(){
+    this.message = '';
+    this.isLoading = true;
+
+    let response = await this.api.autocreateInvoice();
+    console.log(response);
+    this.isLoading = false;
+  }
+
+
 
   async postInvoice() {
     this.message = '';
@@ -43,6 +53,11 @@ export class PostInvoiceComponent {
       response = await this.api.updateInvoice(this._invoice);
       this.submit.emit(true);
     } else {
+      if(this._invoice.id == null ||this._invoice.date == null ||this._invoice.invoiceNumber== null ||this._invoice.status == null ||this._invoice.totalAmount == null ||this._invoice.vat == null){
+        this.message = 'Incomplete Invoice. Please Complete the form.';
+        this.isLoading = false;
+        return;
+      }
       if(this.api.invoices.find(i => i.invoiceNumber === this._invoice.invoiceNumber)) {
         this.message = 'invoice number already exists';
         this.isLoading = false;
@@ -56,6 +71,4 @@ export class PostInvoiceComponent {
     console.log(response);
     this.isLoading = false;
   }
-
-
 }

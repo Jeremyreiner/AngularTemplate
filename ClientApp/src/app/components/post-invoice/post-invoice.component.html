@@ -36,5 +36,8 @@
 
   <button mat-raised-button color="primary" type="submit">{{update? 'Update':'Create'}}</button>
 </form>
+<form style="display:grid;" (ngSubmit)="postAutoInvoice()" #invoiceForm="ngForm">
+  <button mat-raised-button color="secondary" type="submit">Auto Create</button>
+</form>
 
 <mat-spinner strokeWidth="2" diameter="40" style="margin: auto;" *ngIf="isLoading"></mat-spinner>

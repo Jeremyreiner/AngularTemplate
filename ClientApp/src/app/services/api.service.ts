@@ -3,6 +3,7 @@ import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {Invoice} from '../models/Invoice';
 import {Result} from '../models/Constants';
 import {ToastService} from './toast.service';
+import { StatusEnum } from '../models/StatusEnum';
 
 
 @Injectable()
@@ -60,6 +61,21 @@ export class ApiService {
     return headers;
   }
 
+  async autocreateInvoice(): Promise<string> {
+    let model = new Invoice();
+
+    try {
+      const invoice =  await this.post<string>('Invoice', model);
+      this.toast.openToast('Invoice created successfully', true);
+      await this.getAllInvoices();
+      return invoice;
+    } catch (e) {
+      console.log('Error', e);
+      this.toast.openToast('Error creating invoice', false);
+      return '';
+    }
+  }
+
   async createInvoice(model: Invoice): Promise<string> {
     try {
       const invoice =  await this.post<string>('Invoice', model);
@@ -96,3 +112,7 @@ export class ApiService {
     }
   }
 }
+function uuidv4() {
+  throw new Error('Function not implemented.');
+}
+

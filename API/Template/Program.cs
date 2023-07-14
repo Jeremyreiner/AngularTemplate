@@ -24,6 +24,7 @@ builder.Services.AddSwaggerGen();
 
 //Services
 builder.Services.AddSingleton<MainService>();
+builder.Services.AddSingleton<BackGroundService>();
 
 //Data Access Services
 builder.Services.AddScoped<IDalService, DalService>();

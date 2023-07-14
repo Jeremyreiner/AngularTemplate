@@ -29,8 +29,6 @@ namespace Template.Shared.Services
             _InvoiceRepository = invoiceRepository;
         }
 
-
-        // CREATE
         public async Task<Guid> CreateManagerAsync(ClassType classType, object model)
         {
             switch (classType)
@@ -42,14 +40,15 @@ namespace Template.Shared.Services
                 case ClassType.Invoice:
                     var invoice = (InvoiceModel)model;
 
+                    if (invoice.Id == Guid.Empty)
+                        invoice = AutoFillInvoice();
+
                     return await CreateInvoiceAsync(invoice);
                 default:
                     return Guid.Empty;
             }
         }
 
-
-        // DELETE
         public async Task<HttpStatusCode> DeleteManagerAsync(ClassType classType, object model)
         {
             switch (classType)
@@ -71,7 +70,6 @@ namespace Template.Shared.Services
             }
         }
 
-        // UPDATE
         public async Task<Guid> UpdateManagerAsync(ClassType classType, object model)
         {
             switch (classType)
@@ -80,22 +78,21 @@ namespace Template.Shared.Services
                     var user = (UserModel)model;
 
                     var updatedUser = user.ToEntity();
-                    
+
                     var updated = await _UserRepository.UpdateAsync(updatedUser);
-                    
+
                     return updated.Value.Id;
                 case ClassType.Invoice:
                     var invoice = (InvoiceModel)model;
 
                     var response = await _InvoiceRepository.UpdateAsync(invoice.ToEntity());
-                    
+
                     return response.Value.Id;
                 default:
                     return Guid.Empty;
             }
         }
 
-        // GET
         public async Task<Result<UserEntity>> GetUserAsync(string id)
         {
             var guid = ValidateGuid(id);
@@ -112,14 +109,12 @@ namespace Template.Shared.Services
 
             if (guid != Guid.Empty)
                 return await _InvoiceRepository.GetByAsync(id, u => u.Id == guid);
-            
+
             return Result<InvoiceEntity>.Failed(new Error(HttpStatusCode.UnprocessableEntity));
         }
 
         public async Task<Result<List<InvoiceEntity>>> GetAllInvoices() => await _InvoiceRepository.GetListByAsync();
 
-
-        // AUTH
         public async Task<Result<UserEntity>> Login(string email, string password)
         {
             var result = await _UserRepository.GetByAsync(u => u.Email == email);
@@ -158,8 +153,6 @@ namespace Template.Shared.Services
             return await _UserRepository.UpdateAsync(verified.Value);
         }
 
-
-
         public void CheckForThrow(Error error)
         {
             _Logger.LogCritical(error.Code.ToString());
@@ -177,6 +170,13 @@ namespace Template.Shared.Services
                     HttpStatusCode.PreconditionFailed => new UnauthorizedException(error.Code.ToString()),
                     _ => new Exception()
                 };
+        }
+
+        public async Task InvoiceTimeEventManagerAsync(CancellationToken ct)
+        {
+            await RemovePaidInvoices();
+
+            await UpdateUnpaidInvoices();
         }
 
         private async Task<Guid> CreateUserAsync(UserModel model)
@@ -197,6 +197,17 @@ namespace Template.Shared.Services
             return result.Value.Id;
         }
 
+        private InvoiceModel AutoFillInvoice() =>
+            new()
+            {
+                Id = Guid.NewGuid(),
+                InvoiceNumber = Guid.NewGuid().ToString(),
+                Status = StatusEnum.Unpaid,
+                TotalAmount = Faker.RandomNumber.Next(0, 100),
+                Vat = Faker.RandomNumber.Next(0, 20),
+                Date = DateTime.Now
+            };
+
         private async Task<Guid> CreateInvoiceAsync(InvoiceModel model)
         {
             var entity = model.ToEntity();
@@ -205,9 +216,9 @@ namespace Template.Shared.Services
                 entity.Id = Guid.NewGuid();
 
             var user = await GetUserAsync(entity.Id.ToString());
-            if(user.IsSuccess)
-                    CheckForThrow(new Error(HttpStatusCode.AlreadyReported));
-            
+            if (user.IsSuccess)
+                CheckForThrow(new Error(HttpStatusCode.AlreadyReported));
+
             var result = await _InvoiceRepository.AddAsync(entity);
 
             CheckForThrow(result.Error);
@@ -215,6 +226,39 @@ namespace Template.Shared.Services
             return result.Value.Id;
         }
 
+        private async Task RemovePaidInvoices()
+        {
+            var result = await GetAllInvoices();
+
+            if (!result.IsSuccess)
+                return;
+
+            var invoices = result.Value.Where(i => i.Status == StatusEnum.Paid).ToList();
+
+            foreach (var invoice in invoices)
+                await _InvoiceRepository.DeleteAsync(invoice);
+        }
+        private async Task UpdateUnpaidInvoices()
+        {
+            var result = await GetAllInvoices();
+
+            if (!result.IsSuccess)
+                return;
+
+            var invoices = result.Value.Where(i => i.Status != StatusEnum.Paid ).ToList();
+
+            foreach (var invoice in invoices)
+            {
+                var enumMap = new Dictionary<int, StatusEnum>
+                {
+                    { 1, StatusEnum.Paid },
+                    { 0, StatusEnum.Overdue },
+                };
+                invoice.Status = enumMap[Faker.RandomNumber.Next(0, 1)];
+
+                await _InvoiceRepository.UpdateAsync(invoice);
+            }
+        }
         private async Task<Result<HttpStatusCode>> DeleteUserAsync(string publicKey)
         {
             var result = await GetUserAsync(publicKey);
@@ -249,6 +293,5 @@ namespace Template.Shared.Services
 
             return valid ? guid : Guid.Empty;
         }
-
     }
 }
