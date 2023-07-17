@@ -21,6 +21,7 @@ export class GetInvoicesComponent implements OnInit, OnChanges {
 
   total = 0;
   totalVat = 0;
+  empty = false;
 
   dataSource = new MatTableDataSource<Invoice>();
 
@@ -39,7 +40,7 @@ export class GetInvoicesComponent implements OnInit, OnChanges {
 
   ngOnChanges() {
     this.calculateTotal();
-  }
+  } 
 
   async ngOnInit() {
     this.calculateTotal();
@@ -62,6 +63,9 @@ export class GetInvoicesComponent implements OnInit, OnChanges {
     if (this.invoices?.length) {
       this.total = this.invoices.map(i => i.totalAmount).reduce((a, b) => a + b, 0);
       this.totalVat = this.invoices.map(i => i.vat).reduce((a, b) => a + b, 0);
+      this.empty = false;
+    }else{
+      this.empty = true;
     }
     this.initTable();
   }

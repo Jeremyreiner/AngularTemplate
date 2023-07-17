@@ -1,10 +1,19 @@
 <script src="get-invoices.component.ts"></script>
-<mat-card-header>
+<mat-card-header *ngIf="!empty" >
   <mat-card-title [style.color]="Constants.color(true)">
     View Invoices
   </mat-card-title>
   <mat-card-subtitle>
     To Edit or Delete an invoice, click the three dots on the right side of the invoice.
+  </mat-card-subtitle>
+  <mat-icon class="refresh" (click)="refreshInvoices()">refresh</mat-icon>
+</mat-card-header>
+<mat-card-header *ngIf="empty">
+  <mat-card-title [style.color]="Constants.color(true)">
+    No Invoices
+  </mat-card-title>
+  <mat-card-subtitle>
+    Create an invoice to see results below.
   </mat-card-subtitle>
   <mat-icon class="refresh" (click)="refreshInvoices()">refresh</mat-icon>
 </mat-card-header>
@@ -65,11 +74,9 @@
 
     <!-- Table Data Rows -->
     <mat-row *matRowDef="let invoice; columns: displayedColumns"></mat-row>
-
-
   </mat-table>
 
-  <mat-spinner style="margin: auto" *ngIf="invoices === null"></mat-spinner>
+  <!-- <mat-spinner style="margin: auto" *ngIf="invoices === null"></mat-spinner> -->
 
 
 
