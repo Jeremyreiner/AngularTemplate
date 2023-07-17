@@ -40,7 +40,7 @@ namespace Template.Shared.Services
                 case ClassType.Invoice:
                     var invoice = (InvoiceModel)model;
 
-                    if (invoice.Id == Guid.Empty)
+                    if (invoice.AutoCreate)
                         invoice = AutoFillInvoice();
 
                     return await CreateInvoiceAsync(invoice);

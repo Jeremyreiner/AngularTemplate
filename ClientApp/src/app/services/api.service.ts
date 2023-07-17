@@ -63,7 +63,7 @@ export class ApiService {
 
   async autocreateInvoice(): Promise<string> {
     let model = new Invoice();
-
+    model.AutoCreate = true;
     try {
       const invoice =  await this.post<string>('Invoice', model);
       this.toast.openToast('Invoice created successfully', true);

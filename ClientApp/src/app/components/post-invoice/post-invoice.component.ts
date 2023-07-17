@@ -52,7 +52,7 @@ export class PostInvoiceComponent {
       response = await this.api.updateInvoice(this._invoice);
       this.submit.emit(true);
     } else {
-      if(this._invoice.id == "" ||this._invoice.date == null ||this._invoice.invoiceNumber== "" ||this._invoice.status == null ||this._invoice.totalAmount == null ||this._invoice.vat == null){
+      if(this._invoice.date == null ||this._invoice.status == null || this._invoice.invoiceNumber == null ||this._invoice.totalAmount == null ||this._invoice.vat == null){
         this.message = 'Incomplete Invoice. Please Complete the form.';
         this.isLoading = false;
         return;
@@ -63,6 +63,7 @@ export class PostInvoiceComponent {
         return;
       }
       this._invoice.id = Constants.guidNull;
+      this._invoice.AutoCreate = false;
       if(this._invoice.date !== null && this._invoice.status !== null) {
         response = await this.api.createInvoice(this._invoice);
       }

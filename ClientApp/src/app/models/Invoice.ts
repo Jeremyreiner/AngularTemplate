@@ -6,4 +6,5 @@ export class Invoice {
   status: StatusEnum;
   totalAmount: number;
   vat: number;
+  AutoCreate: boolean;
 }
