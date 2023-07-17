@@ -12,18 +12,18 @@ namespace Template.Shared.Interfaces.IRepositories
 {
     public interface IInvoiceRepository
     {
-        Task<Result<InvoiceEntity>> AddAsync(InvoiceEntity user);
+        Task<Result<InvoiceEntity>> AddAsync(InvoiceEntity invoice);
 
-        Task<Result<InvoiceEntity>> UpdateAsync(InvoiceEntity user);
+        Task<Result<InvoiceEntity>> UpdateAsync(InvoiceEntity invoice);
 
-        Task<Result<HttpStatusCode>> DeleteAsync(InvoiceEntity user);
+        Task UpdateRangeAsync(List<InvoiceEntity> invoices);
+
+        Task<Result<HttpStatusCode>> DeleteAsync(InvoiceEntity invoice);
+
+        Task<Result<HttpStatusCode>> DeleteRangeAsync(List<InvoiceEntity> invoice);
 
         Task<Result<InvoiceEntity>> GetByAsync(string publicKey, Expression<Func<InvoiceEntity, bool>> predicate);
 
-        Task<Result<InvoiceEntity>> GetWithAsync(string publicKey, Expression<Func<InvoiceEntity, bool>> predicate);
-
         Task<Result<List<InvoiceEntity>>> GetListByAsync();
-
-        Task<Result<List<InvoiceEntity>>> GetListWithAsync();
     }
 }

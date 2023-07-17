@@ -174,7 +174,7 @@ namespace Template.Shared.Services
 
         public async Task InvoiceTimeEventManagerAsync(CancellationToken ct)
         {
-            await RemovePaidInvoices();
+            var status = await RemovePaidInvoices();
 
             await UpdateUnpaidInvoices();
         }
@@ -226,17 +226,20 @@ namespace Template.Shared.Services
             return result.Value.Id;
         }
 
-        private async Task RemovePaidInvoices()
+        private async Task<HttpStatusCode> RemovePaidInvoices()
         {
             var result = await GetAllInvoices();
 
             if (!result.IsSuccess)
-                return;
+                return HttpStatusCode.BadRequest;
 
-            var invoices = result.Value.Where(i => i.Status == StatusEnum.Paid).ToList();
+            var invoices = result.Value
+                .Where(i => i.Status == StatusEnum.Paid)
+                .ToList();
 
-            foreach (var invoice in invoices)
-                await _InvoiceRepository.DeleteAsync(invoice);
+            var status = await _InvoiceRepository.DeleteRangeAsync(invoices);
+
+            return status.Status;
         }
         private async Task UpdateUnpaidInvoices()
         {
@@ -245,19 +248,18 @@ namespace Template.Shared.Services
             if (!result.IsSuccess)
                 return;
 
+            var enumMap = new Dictionary<int, StatusEnum>
+            {
+                { 0, StatusEnum.Overdue },
+                { 1, StatusEnum.Paid }
+            };
+
             var invoices = result.Value.Where(i => i.Status != StatusEnum.Paid ).ToList();
 
             foreach (var invoice in invoices)
-            {
-                var enumMap = new Dictionary<int, StatusEnum>
-                {
-                    { 1, StatusEnum.Paid },
-                    { 0, StatusEnum.Overdue },
-                };
                 invoice.Status = enumMap[Faker.RandomNumber.Next(0, 1)];
 
-                await _InvoiceRepository.UpdateAsync(invoice);
-            }
+            await _InvoiceRepository.UpdateRangeAsync(invoices);
         }
         private async Task<Result<HttpStatusCode>> DeleteUserAsync(string publicKey)
         {

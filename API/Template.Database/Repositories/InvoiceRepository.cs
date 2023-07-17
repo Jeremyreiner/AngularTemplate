@@ -39,9 +39,27 @@ namespace Template.Database.Repositories
                 : Result<InvoiceEntity>.Success(post);
         }
 
+        public async Task UpdateRangeAsync(List<InvoiceEntity> invoices)
+        {
+            _DbContext.Invoices.UpdateRange(invoices);
+
+            await _DbContext.SaveChangesAsync();
+        }
+
         public async Task<Result<HttpStatusCode>> DeleteAsync(InvoiceEntity post)
         {
             _DbContext.Invoices.Remove(post);
+
+            var count = await _DbContext.SaveChangesAsync();
+
+            return count == 0
+                ? Result<HttpStatusCode>.Deleted()
+                : Result<HttpStatusCode>.Failed(new Error(HttpStatusCode.NotModified));
+        }
+
+        public async Task<Result<HttpStatusCode>> DeleteRangeAsync(List<InvoiceEntity> invoices)
+        {
+            _DbContext.RemoveRange(invoices);
 
             var count = await _DbContext.SaveChangesAsync();
 
@@ -59,24 +77,6 @@ namespace Template.Database.Repositories
             return post is not null
                 ? Result<InvoiceEntity>.Success(post)
                 : Result<InvoiceEntity>
-                    .Failed(new Error(HttpStatusCode.NotFound));
-        }
-
-        public Task<Result<InvoiceEntity>> GetWithAsync(string publicKey, Expression<Func<InvoiceEntity, bool>> predicate)
-        {
-            throw new NotImplementedException();
-        }
-
-
-        public async Task<Result<List<InvoiceEntity>>> GetListWithAsync()
-        {
-            var posts = await _DbContext.Invoices
-                .Include(invoice => invoice.Status)
-                .ToListAsync();
-
-            return posts.Any()
-                ? Result<List<InvoiceEntity>>.Success(posts)
-                : Result<List<InvoiceEntity>>
                     .Failed(new Error(HttpStatusCode.NotFound));
         }
 

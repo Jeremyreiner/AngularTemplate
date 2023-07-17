@@ -45,15 +45,12 @@ namespace Template.Services
         {
             if (addEvent)
             {
-                _Logger.LogInformation("BG Event attached");
                 _DailyTimer.Elapsed += async (sender, e) => await InvoiceEventManagerAsync(sender, e);
 
                 _InvoiceEventsCompleted = false;
             }
             else
             {
-                _Logger.LogInformation("BG Event DE-attached");
-
                 _DailyTimer.Elapsed -= async (sender, e) => await InvoiceEventManagerAsync(sender, e);
 
                 _InvoiceEventsCompleted = true;
@@ -79,10 +76,10 @@ namespace Template.Services
 
             InvoiceEventHandler(false);
 
-            DailyTimerHandler(_Ct);
+            TimerHandler(_Ct);
         }
 
-        private void DailyTimerHandler(CancellationToken ct)
+        private void TimerHandler(CancellationToken ct)
         {
             if (!AllEventsCompleted()) return;
 
