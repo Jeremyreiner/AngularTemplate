@@ -11,8 +11,6 @@ namespace Template.Database.Infrastructure.MySql
             Database.EnsureCreated();
         }
 
-        public DbSet<UserEntity> Users { get; set; } = null!;
-        
         public DbSet<InvoiceEntity> Invoices { get; set; } = null!;
     }
 }

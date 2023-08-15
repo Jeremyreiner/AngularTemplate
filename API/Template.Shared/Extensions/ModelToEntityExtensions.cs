@@ -6,14 +6,6 @@ namespace Template.Shared.Extensions;
 
 public static class ModelToEntityExtensions
 {
-    public static UserEntity ToEntity(this UserModel model) =>
-        new()
-        {
-            FirstName = model.FirstName,
-            LastName = model.LastName,
-            Email = model.Email,
-        };
-
     public static InvoiceEntity ToEntity(this InvoiceModel model) =>
         new()
         {
@@ -24,14 +16,4 @@ public static class ModelToEntityExtensions
             Vat = model.Vat,
             TotalAmount = model.TotalAmount
         };
-
-
-    private static Guid ValidateGuid(string key)
-    {
-        var valid = Guid.TryParse(key, out var guid);
-
-        return valid 
-            ? guid
-            : Guid.Empty;
-    }
 }

@@ -89,13 +89,13 @@ export class ApiService {
     }
   }
 
-  async getInvoice(id: string): Promise<Result<Invoice>> {
+  async getInvoice(id: string): Promise<Invoice> {
     return await this.get(`Invoice/${id}`);
   }
 
   async getAllInvoices(): Promise<void> {
-    const res = await this.get<Result<Invoice[]>>('Invoice/All');
-    this.invoices = res.value;
+    const res = await this.get<Invoice[]>('Invoice/All');
+    this.invoices = res;
   }
 
   async updateInvoice(invoice: Invoice): Promise<string> {
