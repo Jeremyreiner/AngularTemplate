@@ -12,19 +12,19 @@ public class MainService
         _BgService = bgService;
     }
 
-    public async Task StartAsync()
+    public async Task StartAsync(CancellationToken ct)
     {
         _Logger.LogInformation("Starting Server...");
 
-        _BgService.InitializeDailyTimer(_BgService.MinuteTimer(), new CancellationToken());
+        _BgService.InitializeDailyTimer(_BgService.MinuteTimer(), ct);
 
         _Logger.LogInformation("Server Started.");
     }
 
-    public async Task StopAsync()
+    public async Task StopAsync(CancellationToken ct)
     {
         _Logger.LogInformation("Server Shutting Down...");
-
+        
         _Logger.LogInformation("Server Shut Down.");
     }
 }

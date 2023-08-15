@@ -39,7 +39,7 @@ namespace Template.Services
             return Task.CompletedTask;
         }
 
-        public int MinuteTimer() => 60000;
+        public int MinuteTimer() => 30000;
 
         private void InvoiceEventHandler(bool addEvent)
         {

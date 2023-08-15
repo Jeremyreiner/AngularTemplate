@@ -148,6 +148,7 @@ namespace Template.Shared.Services
                 return verified;
             }
 
+
             verified.Value.Password = model.NewPassword.Hash();
 
             return await _UserRepository.UpdateAsync(verified.Value);

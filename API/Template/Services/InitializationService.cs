@@ -9,14 +9,14 @@
             _MainService = mainService;
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
+        public async Task StartAsync(CancellationToken ct)
         {
-            await _MainService.StartAsync();
+            await _MainService.StartAsync(ct);
         }
 
-        public async Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken ct)
         {
-            await _MainService.StopAsync();
+            await _MainService.StopAsync(ct);
         }
     }
 }

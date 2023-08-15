@@ -16,6 +16,7 @@ import {MatNativeDateModule} from '@angular/material/core';
 import {MatSelectModule} from '@angular/material/select';
 import {PostInvoiceComponent} from './components/post-invoice/post-invoice.component';
 import {GetInvoicesComponent} from './components/get-invoices/get-invoices.component';
+import {VideoComponent} from './components/video/video.component';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {EditInvoiceDialogComponent} from './dialogs/edit-invoice-dialog/edit-invoice-dialog.component';
 import {InvoiceStatusColorPipe, InvoiceStatusPipe} from './pipes/InvoiceStatusPipe';
@@ -36,6 +37,7 @@ import {MatPaginatorModule} from '@angular/material/paginator';
     HttpStatusPipe,
     PostInvoiceComponent,
     GetInvoicesComponent,
+    VideoComponent,
     EditInvoiceDialogComponent,
     InvoiceStatusPipe,
     InvoiceStatusColorPipe,
