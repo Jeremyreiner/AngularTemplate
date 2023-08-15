@@ -156,7 +156,7 @@ namespace Template.Shared.Services
 
         public void CheckForThrow(Error error)
         {
-            _Logger.LogCritical(error.Code.ToString());
+            _Logger.LogInformation("Error Status: {0}", error.Code);
 
             if (error.Code != HttpStatusCode.OK)
                 throw error.Code switch
