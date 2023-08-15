@@ -37,12 +37,11 @@ export class PostInvoiceComponent {
   async postAutoInvoice(){
     this.message = '';
     this.isLoading = true;
-
-    await this.api.autocreateInvoice();
+    this._invoice.AutoCreate = true;
     this.isLoading = false;
+
+    await this.api.createInvoice(this._invoice);
   }
-
-
 
   async postInvoice() {
     this.message = '';

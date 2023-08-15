@@ -61,23 +61,9 @@ export class ApiService {
     return headers;
   }
 
-  async autocreateInvoice(): Promise<string> {
-    let model = new Invoice();
-    model.AutoCreate = true;
-    try {
-      const invoice =  await this.post<string>('Invoice', model);
-      this.toast.openToast('Invoice created successfully', true);
-      await this.getAllInvoices();
-      return invoice;
-    } catch (e) {
-      console.log('Error', e);
-      this.toast.openToast('Error creating invoice', false);
-      return '';
-    }
-  }
-
   async createInvoice(model: Invoice): Promise<string> {
     try {
+
       const invoice =  await this.post<string>('Invoice', model);
       this.toast.openToast('Invoice created successfully', true);
       await this.getAllInvoices();
