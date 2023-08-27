@@ -10,9 +10,7 @@ namespace Template.Shared.Services
 {
     public class DalService : IDalService
     {
-
         private readonly IInvoiceRepository _InvoiceRepository;
-
 
         public DalService(IInvoiceRepository invoiceRepository)
         {
