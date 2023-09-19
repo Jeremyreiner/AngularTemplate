@@ -24,11 +24,9 @@ builder.Services.AddSwaggerGen();
 
 //Services
 builder.Services.AddSingleton<MainService>();
-builder.Services.AddSingleton<BackGroundService>();
 
 //Data Access Services
 builder.Services.AddScoped<IDalService, DalService>();
-builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IInvoiceRepository, InvoiceRepository>();
 
 //Swagger Auth

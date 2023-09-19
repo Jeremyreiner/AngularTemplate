@@ -15,20 +15,4 @@ public static class EntityToModelExtension
             Date = entity.Date,
             Status = entity.Status,
         };
-
-
-    public static UserModel ToModel(this UserEntity entity) =>
-        new()
-        {
-            FirstName = entity.FirstName,
-            LastName = entity.LastName,
-            Email = entity.Email,
-        };
-
-
-    public static List<UserModel> ToModelList(this IEnumerable<UserEntity> list) =>
-        list
-            .Select(entity => entity
-                .ToModel())
-            .ToList();
 }

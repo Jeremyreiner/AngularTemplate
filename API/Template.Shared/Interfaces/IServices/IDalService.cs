@@ -21,7 +21,7 @@ namespace Template.Shared.Interfaces.IServices
         /// <param name="type">Enum type for entities</param>
         /// <param name="model">Entity property revealed to frontend</param>
         /// <returns></returns>
-        Task<Guid> CreateManagerAsync(ClassType classType, object model);
+        Task<Guid> CreateManagerAsync(object model);
 
         #endregion
         #region Delete
@@ -30,21 +30,15 @@ namespace Template.Shared.Interfaces.IServices
         /// Delete methods for entities
         /// </summary>
         /// <returns>HttpStatusResponse</returns>
-        Task<HttpStatusCode> DeleteManagerAsync(ClassType classType, object model);
+        Task<HttpStatusCode> DeleteManagerAsync(object model);
 
         #endregion
         #region Update
 
-        Task<Guid> UpdateManagerAsync(ClassType classType, object model);
+        Task<Guid> UpdateManagerAsync(object model);
 
         #endregion
         #region Get
-
-        /// <summary>
-        /// Gets user from DB by id.
-        /// </summary>
-        /// <returns>Result of type User</returns>
-        Task<Result<UserEntity>> GetUserAsync(string id);
 
 
         /// <summary>
@@ -60,35 +54,5 @@ namespace Template.Shared.Interfaces.IServices
         Task<Result<List<InvoiceEntity>>> GetAllInvoices();
 
         #endregion
-        #region Athentication
-
-        /// <summary>
-        /// Login requires a query to the db using an email. if an entity is registered,
-        /// then if the entered password matches the entities hashed password, than a succesful entity is returned
-        /// </summary>
-        /// <param name="email"></param>
-        /// <param name="password"></param>
-        /// <returns>Result of type User</returns>
-        Task<Result<UserEntity>> Login(string email, string password);
-
-        /// <summary>
-        /// Verifies that the entered New password, and confirmed new password match,
-        /// Verifies that the original password, is indeed the original password,
-        /// if both these checks pass, then the new password is updated and the user is saved
-        /// </summary>
-        /// <param name="email"></param>
-        /// <param name="model"></param>
-        /// <returns>Result of type User</returns>
-        Task<Result<UserEntity>> ChangePassword(ChangePasswordModel model);
-
-        #endregion
-        #region
-
-        Task InvoiceTimeEventManagerAsync(CancellationToken ct);
-
-        void CheckForThrow(Error error);
-        
-        #endregion
-
     }
 }
