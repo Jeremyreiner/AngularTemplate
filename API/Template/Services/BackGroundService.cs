@@ -14,7 +14,7 @@ namespace Template.Services
         private CancellationToken _Ct;
 
         private bool _InvoiceEventsCompleted;
-
+         
         public BackGroundService(ILogger<BackGroundService> logger, IServiceProvider serviceProvider)
         {
             _Logger = logger;
