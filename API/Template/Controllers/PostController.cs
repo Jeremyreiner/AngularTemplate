@@ -56,7 +56,7 @@ namespace Template.Controllers
             return result?.Likes.ToModelList();
         }
 
-        [HttpGet(nameof(GetFollowers))]
+        [HttpGet(nameof(GetAllPostsBy))]
         public async Task<List<PostModel>?> GetAllPostsBy()
         {
             var result = await _DalService.GetAllPostsByAsync();

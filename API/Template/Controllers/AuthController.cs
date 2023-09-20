@@ -10,7 +10,6 @@ namespace Template.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-
     public class AuthController : ControllerBase
     {
         readonly IDalService _DalService;
