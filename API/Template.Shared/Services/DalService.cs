@@ -1,4 +1,4 @@
-﻿using System.Net;
+﻿using Microsoft.Extensions.Logging;
 using Template.Shared.Entities;
 using Template.Shared.Enums;
 using Template.Shared.Extensions;
@@ -10,94 +10,330 @@ namespace Template.Shared.Services
 {
     public class DalService : IDalService
     {
-        private readonly IInvoiceRepository _InvoiceRepository;
+        readonly IUserRepository _UserRepository;
 
-        public DalService(IInvoiceRepository invoiceRepository)
+        private readonly IPostRepository _postRepository;
+
+        readonly ILogger<DalService> _Logger;
+
+        public DalService(
+            IUserRepository userRepository,
+            ILogger<DalService> logger,
+            IPostRepository postRepository)
         {
-            _InvoiceRepository = invoiceRepository;
+            _UserRepository = userRepository;
+            _Logger = logger;
+            _postRepository = postRepository;
         }
 
-        public async Task<Guid> CreateManagerAsync(InvoiceModel model)
-        {
-            if (model.AutoCreate)
-                model = AutoFillInvoice();
+        #region CREATE ENTITY
 
+        public async Task<Guid> CreatorManagerAsync(Entity type, object model)
+        {
+            switch (type)
+            {
+                case Entity.User:
+                    var userModel = (UserModel)model;
+
+                    var user = await CreateUserAsync(userModel);
+
+                    return user.PublicId;
+
+                case Entity.Post:
+                    var postModel = (PostModel)model;
+
+                    var post = await CreatePostAsync(postModel);
+                    return post.PublicId;
+                default:
+                    return Guid.Empty;
+            }
+        }
+
+        #endregion
+
+        #region UPDATE ENTITY
+
+        public async Task<Guid> UpdateManagerAsync(Entity type, string publicKey, object toUpdate) =>
+            type switch
+            {
+                Entity.User => await UpdateUserAsync(publicKey, toUpdate),
+                Entity.Post => await UpdatePostAsync(publicKey, toUpdate),
+                _ => Guid.Empty
+            };
+
+        #endregion
+        #region DELETE ENTITY
+
+        public async Task<bool> DeleteManagerAsync(Entity type, string publicKey)
+        {
+            switch (type)
+            {
+                case Entity.User:
+                    return await DeleteUserAsync(publicKey);
+
+                case Entity.Post:
+                    return await DeletePostAsync(publicKey);
+
+                default:
+                    return false;
+            }
+        }
+
+        #endregion
+        #region GetBy
+
+        public async Task<UserEntity?> GetUserByAsync(string publicKey)
+        {
+            var guid = publicKey.ValidGuid();
+
+            if (guid != Guid.Empty)
+                return await _UserRepository.GetByAsync(u => u.PublicId == guid);
+            return null;
+        }
+
+        public async Task<UserEntity?> GetUserWithAsync(string publicKey)
+        {
+            var guid = publicKey.ValidGuid();
+
+            if (guid != Guid.Empty)
+                return await _UserRepository.GetWithAsync(u => u.PublicId == guid);
+            return null;
+        }
+
+        public async Task<PostEntity?> GetPostByAsync(string publicKey)
+        {
+            var guid = publicKey.ValidGuid();
+
+            if (guid != Guid.Empty)
+                return await _postRepository.GetByAsync(publicKey, u => u.PublicId == guid);
+            return null;
+        }
+
+        public async Task<PostEntity?> GetPostWithAsync(string publicKey)
+        {
+            var guid = publicKey.ValidGuid();
+
+            if (guid != Guid.Empty)
+                return await _postRepository.GetWithAsync(publicKey, u => u.PublicId == guid);
+            return null;
+        }
+
+        #endregion
+        #region GetAllBy
+
+        public async Task<List<UserEntity>?> GetAllByAsync() =>
+            await _UserRepository.GetListWithAsync();
+
+        public async Task<List<PostEntity>?> GetAllPostsByAsync() =>
+            await _postRepository.GetListWithAsync();
+
+
+        #endregion
+        #region Subcription
+
+        public async Task<UserEntity?> SubscribeToAsync(string masterPublicKey, string slavePublicKey)
+        {
+            var user1 = await GetUserByAsync(masterPublicKey);
+
+            var user2 = await GetUserByAsync(slavePublicKey);
+
+            if (user1 == null || user2 == null)
+                return null;
+
+            if (user1.PrivateId == user2.PrivateId)
+                return user1;
+
+            if (user1.Followers.Contains(user2))
+                user1.Followers.Remove(user2);
+            else
+                user1.Followers.Add(user2);
+
+            await _UserRepository.UpdateAsync(user1);
+
+            return user1;
+        }
+
+        public async Task<PostEntity?> LikePostAsync(string userPublicKey, string postPublicKey)
+        {
+            var user = await GetUserByAsync(userPublicKey);
+
+            var post = await GetPostWithAsync(postPublicKey);
+
+            if (user == null || post == null)
+                return null;
+
+            if (post.Likes.Contains(user))
+                post.Likes.Remove(user);
+            else
+                post.Likes.Add(user);
+
+            await _postRepository.UpdateAsync(post);
+
+            return post;
+        }
+
+        #endregion
+        #region AUTHENTICATION
+
+        public async Task<UserEntity?> Login(string email, string password)
+        {
+            var result = await _UserRepository.GetByAsync(u => u.Email == email);
+
+            if (result == null)
+                return null;
+
+            var verified = password.VerifyHash(result.Password);
+
+            return verified
+                ? result
+                : null;
+        }
+
+        public async Task<bool> ChangePassword(ChangePasswordModel model)
+        {
+            if (model.ConfirmedPassword != model.NewPassword)
+                return false;
+
+            var verified = await Login(model.Email, model.Password);
+
+            if (verified == null)
+                return false;
+
+            verified.Password = model.NewPassword.Hash();
+
+            verified.LastUpdateOnDt = DateTime.Now;
+
+            await _UserRepository.UpdateAsync(verified);
+
+            return true;
+        }
+
+        #endregion
+        #region Helper Methods
+
+        public async Task<UserEntity> GetRandomUserAsync()
+        {
+            var random = new Random();
+
+            var result = await _UserRepository.GetListByAsync();
+
+            return result is null
+                ? new UserEntity()
+                : result[random.Next(0, result.Count)];
+        }
+
+        public async Task<PostEntity> GetRandomPostAsync()
+        {
+            var random = new Random();
+
+            var result = await _postRepository.GetListByAsync();
+
+            return result is null
+                ? new PostEntity()
+                : result[random.Next(0, result.Count)];
+        }
+
+        #endregion
+        #region Private Methods
+
+        private async Task<UserEntity?> CreateUserAsync(UserModel model)
+        {
             var entity = model.ToEntity();
 
-            if (entity.Id == Guid.Empty)
-                entity.Id = Guid.NewGuid();
+            if (entity.PublicId == Guid.Empty)
+                entity.PublicId = Guid.NewGuid();
 
-            await _InvoiceRepository.AddAsync(entity);
+            var request = await _UserRepository.GetByAsync(u => u.PublicId == entity.PublicId);
 
-            return entity.Id;
-
-        }
-
-        public async Task<Guid> DeleteManagerAsync(InvoiceModel model) =>
-            await _InvoiceRepository.DeleteAsync(model.ToEntity());
-
-        public async Task<Guid> UpdateManagerAsync(InvoiceModel model) =>
-            await _InvoiceRepository.UpdateAsync(model.ToEntity());
-
-        public async Task<InvoiceEntity?> GetInvoiceAsync(string id) =>
-            await _InvoiceRepository.GetByAsync(id, u => u.Id == Guid.Parse(id));
-
-        public async Task<List<InvoiceEntity>> GetAllInvoices() => await _InvoiceRepository.GetListByAsync();
-
-        public async Task InvoiceTimeEventManagerAsync(CancellationToken ct)
-        {
-            var status = await RemovePaidInvoices();
-
-            await UpdateUnpaidInvoices();
-        }
-
-        private InvoiceModel AutoFillInvoice() =>
-            new()
+            if (request != null)
             {
-                Id = Guid.NewGuid(),
-                InvoiceNumber = Guid.NewGuid().ToString(),
-                Status = StatusEnum.Unpaid,
-                TotalAmount = Faker.RandomNumber.Next(0, 100),
-                Vat = Faker.RandomNumber.Next(0, 20),
-                Date = DateTime.Now
-            };
+                return null;
+            }
 
-        private async Task<HttpStatusCode> RemovePaidInvoices()
-        {
-            var result = await GetAllInvoices();
+            entity.PrivateId = Guid.NewGuid();
 
-            if (!result.Any())
-                return HttpStatusCode.BadRequest;
+            await _UserRepository.AddAsync(entity);
 
-            var invoices = result
-                .Where(i => i.Status == StatusEnum.Paid)
-                .ToList();
-
-            await _InvoiceRepository.DeleteRangeAsync(invoices);
-
-            return HttpStatusCode.OK;
+            return entity;
         }
 
-        private async Task UpdateUnpaidInvoices()
+        private async Task<PostEntity?> CreatePostAsync(PostModel model)
         {
-            var result = await GetAllInvoices();
+            var entity = model.ToEntity();
 
-            if (!result.Any())
-                return;
+            if (entity.PublicId == Guid.Empty)
+                entity.PublicId = Guid.NewGuid();
 
-            var enumMap = new Dictionary<int, StatusEnum>
+            if (entity.UserPublicId != Guid.Empty)
             {
-                { 0, StatusEnum.Overdue },
-                { 1, StatusEnum.Paid }
-            };
+                var user = await GetUserByAsync(entity.UserPublicId.ToString());
 
-            var invoices = result.Where(i => i.Status != StatusEnum.Paid).ToList();
+                if (user == null)
+                    return null;
+            }
 
-            foreach (var invoice in invoices)
-                invoice.Status = enumMap[Faker.RandomNumber.Next(0, 1)];
+            entity.PrivateId = Guid.NewGuid();
 
-            await _InvoiceRepository.UpdateRangeAsync(invoices);
+            await _postRepository.AddAsync(entity);
+
+            return entity;
         }
 
+        private async Task<Guid> UpdateUserAsync(string publicKey, object toUpdate)
+        {
+            var user = await GetUserByAsync(publicKey);
+
+            if (user == null)
+                return Guid.Empty;
+
+            user.FirstName = Faker.Name.First();
+            user.LastName = Faker.Name.Last();
+            user.Bio = Faker.Lorem.Paragraph();
+            user.LastUpdateOnDt = DateTime.Now;
+
+            await _UserRepository.UpdateAsync(user);
+
+            return user.PublicId;
+        }
+
+        private async Task<Guid> UpdatePostAsync(string publicKey, object toUpdate)
+        {
+            var post = await GetPostByAsync(publicKey);
+
+            if (post == null)
+                return Guid.Empty;
+
+            post.Description = Faker.Lorem.Sentence();
+            post.LastUpdateOnDt = DateTime.Now;
+
+            await _postRepository.UpdateAsync(post);
+
+            return post.PublicId;
+        }
+
+        private async Task<bool> DeleteUserAsync(string publicKey)
+        {
+            var result = await GetUserByAsync(publicKey);
+
+            if (result == null)
+                return false;
+
+            await _UserRepository.DeleteAsync(result);
+
+            return true;
+        }
+
+        private async Task<bool> DeletePostAsync(string publicKey)
+        {
+            var result = await GetPostByAsync(publicKey);
+
+            if (result == null)
+                return false;
+
+            await _postRepository.DeleteAsync(result);
+
+            return true;
+        }
+        #endregion
     }
 }
